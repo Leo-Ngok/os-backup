@@ -295,3 +295,9 @@ int copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
 	}
 	return len;
 }
+
+uint64 v2p(pagetable_t pgt, uint64 va) {
+	uint64 va_page_front = PGROUNDDOWN(va);
+	uint64 pa_page_front = walkaddr(pgt, va_page_front);
+	return pa_page_front + (va & (PAGE_SIZE - 1));
+}

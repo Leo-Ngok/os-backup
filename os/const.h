@@ -33,4 +33,6 @@ enum {
 
 #define MAX_STR_LEN (200)
 
+#define PROT_NONE (8)
+
 #endif // CONST_H
