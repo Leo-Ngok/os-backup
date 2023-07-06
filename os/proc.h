@@ -2,7 +2,7 @@
 #define PROC_H
 
 #include "types.h"
-
+#include "const.h"
 #define NPROC (16)
 
 // Saved registers for kernel context switches.
@@ -26,7 +26,21 @@ struct context {
 };
 
 enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+/*
+* LAB1: you may need to define struct for TaskInfo here
+*/
+typedef enum {
+	UnInit,
+	Ready,
+	Running,
+	Exited,
+} TaskStatus;
 
+struct TaskInfo {
+	TaskStatus status;
+	unsigned int syscall_times[MAX_SYSCALL_NUM];
+	int time;
+} ;
 // Per-process state
 struct proc {
 	enum procstate state; // Process state
@@ -38,11 +52,14 @@ struct proc {
 	/*
 	* LAB1: you may need to add some new fields here
 	*/
+	uint64 init_cycle;
+	uint64 start_cycle;
+	uint64 total_cycles;
+	unsigned int syscall_times[MAX_SYSCALL_NUM];
+	TaskStatus status;
 };
 
-/*
-* LAB1: you may need to define struct for TaskInfo here
-*/
+
 
 struct proc *curr_proc();
 void exit(int);

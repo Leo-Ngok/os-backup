@@ -15,5 +15,5 @@ typedef struct {
 	uint64 sec; // 自 Unix 纪元起的秒数
 	uint64 usec; // 微秒数
 } TimeVal;
-
+uint64 get_time_m(); 
 #endif // TIMER_H

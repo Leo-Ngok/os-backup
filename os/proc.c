@@ -2,13 +2,14 @@
 #include "defs.h"
 #include "loader.h"
 #include "trap.h"
+#include "timer.h"
 
 struct proc pool[NPROC];
 char kstack[NPROC][PAGE_SIZE];
 __attribute__((aligned(4096))) char ustack[NPROC][PAGE_SIZE];
 __attribute__((aligned(4096))) char trapframe[NPROC][PAGE_SIZE];
 
-extern char boot_stack_top[];
+extern char boot_stack_top[]; // defined in entry.S
 struct proc *current_proc;
 struct proc idle;
 
@@ -86,7 +87,16 @@ void scheduler(void)
 				*/
 				p->state = RUNNING;
 				current_proc = p;
+				// Added in LAB1.
+				// TODO: Warning: Do NOT try to run the process at midnight,
+				// since the impl relys on time of day,
+				// which means that might give a negative value.
+				p->status = Running;
+				p->start_cycle = get_time_m(); //get_cycle();
+				if(p->init_cycle == 0)
+					p->init_cycle = get_time_m();
 				swtch(&idle.context, &p->context);
+				p->total_cycles += get_time_m() - p->start_cycle;
 			}
 		}
 	}
@@ -103,14 +113,16 @@ void sched(void)
 {
 	struct proc *p = curr_proc();
 	if (p->state == RUNNING)
-		panic("sched running");
+		panic("sched running");	
 	swtch(&p->context, &idle.context);
 }
 
 // Give up the CPU for one scheduling round.
 void yield(void)
 {
+	//current_proc->total_cycles += get_time_m()- current_proc->start_cycle;
 	current_proc->state = RUNNABLE;
+	current_proc->status = Ready;
 	sched();
 }
 
@@ -120,6 +132,7 @@ void exit(int code)
 	struct proc *p = curr_proc();
 	infof("proc %d exit with %d", p->pid, code);
 	p->state = UNUSED;
+	p->status = Exited;
 	finished();
 	sched();
 }
